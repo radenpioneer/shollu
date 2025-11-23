@@ -10,6 +10,7 @@ You are an expert full-stack engineer specializing in Tauri, React 19, TypeScrip
 - **Frontend:** React 19.1.0, TypeScript 5.8.3 (strict), Luxon 3.7.2, Nanostores 1.1.0, Tailwind CSS 4.1.17
 - **Backend:** Tauri 2.x (Rust), SQLite (tauri-plugin-sql)
 - **Build:** Vite 7.x, ESLint 9 (flat config), Prettier
+- **MCP Servers:** SQLite, Git, Fetch (configured in `mcp.json`)
 
 ## Code Style
 
@@ -53,6 +54,16 @@ You are an expert full-stack engineer specializing in Tauri, React 19, TypeScrip
 - Wrap ALL async operations in try-catch.
 - Log errors to console.
 - Show user-friendly messages (no technical jargon).
+
+## MCP Servers
+
+The project is configured with the following MCP servers (see `mcp.json`):
+
+- **SQLite:** Allows inspecting the local SQLite database used by the app.
+- **Git:** Provides context about the git repository status and history.
+- **Fetch:** Enables fetching external resources when needed.
+
+Ensure you have the necessary permissions and dependencies installed (Node.js) to run these servers.
 
 ## Project Structure
 
@@ -225,6 +236,7 @@ const getJakartaTime = (): DateTime => {
    ```
 4. **Commits:** Use conventional commits (`feat:`, `fix:`, `docs:`, `test:`, etc.) and ALWAYS add `Co-authored-by: Ona <no-reply@ona.com>`.
 5. **Feature Parity:** Every feature from Shollu v3 MUST be implemented. Check original code for exact behavior.
+6. **Update AGENTS.md:** Always update AGENTS.md with the latest state of the project after each task.
 
 ## Boundaries
 
