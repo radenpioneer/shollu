@@ -1,17 +1,34 @@
 # Shollu DevContainer
 
-This DevContainer is optimized for Tauri + React + TypeScript development with full GUI support.
+DevContainer optimized for Tauri + React + TypeScript development with GUI support for running desktop apps.
 
-## 🖥️ GUI Support
+## Quick Start
 
-**NEW:** This DevContainer now includes a virtual desktop for running Tauri apps!
+### 1. Rebuild Container (First Time)
+Press `Cmd/Ctrl + Shift + P` → "Dev Containers: Rebuild Container" → Wait 5-10 minutes
 
-- **Display Server:** Xvfb (virtual X11)
-- **Window Manager:** Openbox
-- **VNC Access:** Port 5900 (VNC client) or 6080 (browser)
-- **Access URL:** [http://localhost:6080/vnc.html](http://localhost:6080/vnc.html)
+### 2. Access GUI Desktop
+Open browser: **http://localhost:6080/vnc.html** → Click "Connect"
 
-See [GUI_SETUP.md](./GUI_SETUP.md) for detailed instructions.
+### 3. Run App
+```bash
+npm run tauri:dev
+```
+
+The Tauri window will appear in the browser desktop!
+
+## GUI Support
+
+**Display Server:** Xvfb (virtual X11 on :99)  
+**Window Manager:** Openbox  
+**VNC Server:** Port 5900 (for VNC clients)  
+**Browser Access:** Port 6080 (noVNC)  
+**Password:** `password` (if prompted)
+
+**Services auto-start on container start.** If not running:
+```bash
+bash .devcontainer/start-services.sh
+```
 
 ## What's Included
 
@@ -107,22 +124,39 @@ npm run tauri icon   # Generate app icons
 
 ## Troubleshooting
 
-### Port Already in Use
-If port 1420 is already in use:
+### GUI Services Not Running
 ```bash
-# Kill the process using the port
-lsof -ti:1420 | xargs kill -9
+# Check if running
+ps aux | grep -E "(Xvfb|x11vnc|openbox)"
+
+# Restart services
+bash .devcontainer/start-services.sh
+
+# Check logs
+cat /tmp/xvfb.log
+cat /tmp/x11vnc.log
+```
+
+### GTK Initialization Error
+Ensure services are running and DISPLAY is set:
+```bash
+export DISPLAY=:99
+npm run tauri:dev
+```
+
+### Port Already in Use
+```bash
+lsof -ti:1420 | xargs kill -9  # Vite
+lsof -ti:6080 | xargs kill -9  # noVNC
 ```
 
 ### Rust Compilation Slow
-First compilation takes 5-10 minutes. Subsequent builds are much faster due to caching.
+First build takes 5-10 minutes. Subsequent builds are much faster (cached).
 
-### WebKit Errors
-If you see WebKit-related errors, rebuild the container:
-```bash
-# In VS Code: Cmd/Ctrl + Shift + P
-# Run: "Dev Containers: Rebuild Container"
-```
+### VNC Can't Connect
+1. Check port 6080 is forwarded in VS Code
+2. Verify x11vnc is running: `ps aux | grep x11vnc`
+3. Restart services: `bash .devcontainer/start-services.sh`
 
 ## Performance Tips
 
@@ -148,9 +182,40 @@ The devcontainer includes optimized settings:
 - Tailwind CSS IntelliSense
 - Rust analyzer with clippy
 
+## Verification
+
+Test the setup:
+```bash
+# Check services
+ps aux | grep -E "(Xvfb|x11vnc|openbox)"
+
+# Test X11
+export DISPLAY=:99
+xdpyinfo | head -10
+
+# Test GUI app
+xeyes &  # Should appear in VNC desktop
+```
+
+## Technical Details
+
+**System Packages:**
+- Xvfb, x11vnc, openbox, noVNC, websockify
+- WebKit2GTK 4.1, GTK 3, AppIndicator
+- ALSA (audio), SSL/TLS libraries
+
+**Ports:**
+- 1420: Vite dev server
+- 5900: VNC server
+- 6080: noVNC (browser)
+
+**Environment:**
+- `DISPLAY=:99` (set automatically)
+- `RUST_BACKTRACE=1`
+
 ## Resources
 
-- [Tauri Documentation](https://tauri.app/)
-- [React Documentation](https://react.dev/)
+- [Tauri Docs](https://tauri.app/)
+- [React 19 Docs](https://react.dev/)
 - [Rust Book](https://doc.rust-lang.org/book/)
-- [Vite Documentation](https://vitejs.dev/)
+- [Vite Docs](https://vitejs.dev/)
