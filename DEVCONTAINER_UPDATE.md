@@ -1,0 +1,246 @@
+# ✅ DevContainer Updated: GUI Support Added!
+
+## Summary
+
+The DevContainer has been updated to support running Tauri GUI applications. Previously, Tauri apps would crash with GTK initialization errors because there was no display server. Now, the container includes a complete virtual desktop environment.
+
+---
+
+## What Changed
+
+### 🆕 New Packages Installed
+- **Xvfb** - Virtual X11 display server
+- **Openbox** - Lightweight window manager
+- **x11vnc** - VNC server for remote access
+- **noVNC** - Browser-based VNC client
+- **TigerVNC** - VNC viewer
+- **dbus-x11** - D-Bus for X11 applications
+
+### 🆕 New Scripts
+- `.devcontainer/start-services.sh` - Starts display services automatically
+- `.devcontainer/post-create.sh` - Runs after container creation
+
+### 🆕 New Ports
+- **5900** - VNC server (for VNC clients)
+- **6080** - noVNC (browser-based access)
+
+### 🆕 Environment Variables
+- `DISPLAY=:99` - Set automatically for all sessions
+
+### 📝 New Documentation
+- `.devcontainer/GUI_SETUP.md` - Complete setup guide
+- `.devcontainer/QUICK_START.md` - Quick reference
+- `.devcontainer/README.md` - Updated with GUI info
+
+---
+
+## 🚨 Action Required: Rebuild Container
+
+**You MUST rebuild the DevContainer to apply these changes.**
+
+### How to Rebuild
+
+1. **In VS Code:**
+   - Press `Cmd/Ctrl + Shift + P`
+   - Type: "Dev Containers: Rebuild Container"
+   - Press Enter
+   - Wait 5-10 minutes
+
+2. **Or via Command:**
+   ```bash
+   # Exit the container first, then:
+   docker-compose -f .devcontainer/docker-compose.yml build --no-cache
+   ```
+
+---
+
+## After Rebuild
+
+### 1. Verify Services Started
+
+```bash
+ps aux | grep -E "(Xvfb|x11vnc|openbox)"
+```
+
+You should see 3 processes running.
+
+### 2. Access the Desktop
+
+Open in your browser: **[http://localhost:6080/vnc.html](http://localhost:6080/vnc.html)**
+
+Click "Connect" (password: `password` if prompted)
+
+### 3. Run Tauri App
+
+```bash
+npm run tauri:dev
+```
+
+The Tauri window will appear in the browser desktop! 🎉
+
+---
+
+## How It Works
+
+```
+┌─────────────────────────────────────────┐
+│  Your Browser (localhost:6080)          │
+│  ↓                                      │
+│  noVNC (WebSocket VNC Client)           │
+│  ↓                                      │
+│  x11vnc (VNC Server)                    │
+│  ↓                                      │
+│  Xvfb :99 (Virtual Display 1920x1080)   │
+│  ↓                                      │
+│  Openbox (Window Manager)               │
+│  ↓                                      │
+│  Tauri App (Your Shollu Application)    │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Quick Reference
+
+### Start Services Manually
+```bash
+bash .devcontainer/start-services.sh
+```
+
+### Stop Services
+```bash
+pkill -f Xvfb
+pkill -f x11vnc
+pkill -f openbox
+pkill -f websockify
+```
+
+### Check Logs
+```bash
+cat /tmp/xvfb.log
+cat /tmp/x11vnc.log
+cat /tmp/openbox.log
+cat /tmp/novnc.log
+```
+
+### Test Display
+```bash
+export DISPLAY=:99
+xeyes &  # Should appear in VNC desktop
+```
+
+---
+
+## Troubleshooting
+
+### Problem: Services not running after rebuild
+
+**Solution:**
+```bash
+bash .devcontainer/start-services.sh
+```
+
+### Problem: Still getting GTK errors
+
+**Solution:**
+```bash
+# Ensure DISPLAY is set
+export DISPLAY=:99
+
+# Start dbus if needed
+eval $(dbus-launch --sh-syntax)
+
+# Try running again
+npm run tauri:dev
+```
+
+### Problem: Can't connect to VNC
+
+**Solution:**
+1. Check if port 6080 is forwarded in VS Code
+2. Try accessing: `http://localhost:6080/vnc.html`
+3. Check if x11vnc is running: `ps aux | grep x11vnc`
+
+### Problem: Black screen in VNC
+
+**Solution:**
+1. Check if Xvfb is running: `ps aux | grep Xvfb`
+2. Check logs: `cat /tmp/xvfb.log`
+3. Restart services: `bash .devcontainer/start-services.sh`
+
+---
+
+## Performance Notes
+
+### Display Resolution
+Default: 1920x1080x24
+
+To reduce for better performance, edit `.devcontainer/start-services.sh`:
+```bash
+Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &
+```
+
+### VNC Quality
+- Browser VNC (noVNC): Convenient but slightly slower
+- Native VNC client: Faster, connect to `localhost:5900`
+
+### Resource Usage
+- Xvfb: ~50MB RAM
+- x11vnc: ~20MB RAM
+- Openbox: ~10MB RAM
+- Total overhead: ~80MB RAM
+
+---
+
+## Alternative: X11 Forwarding (Linux/macOS Only)
+
+If you're on Linux/macOS with X11, you can skip VNC:
+
+1. On host: `xhost +local:docker`
+2. Edit `devcontainer.json`:
+   ```json
+   "runArgs": [
+     "--env", "DISPLAY=${env:DISPLAY}",
+     "--volume", "/tmp/.X11-unix:/tmp/.X11-unix"
+   ]
+   ```
+3. Rebuild container
+4. Run `npm run tauri:dev` directly
+
+**Note:** This doesn't work on Windows.
+
+---
+
+## Documentation
+
+- **Quick Start:** `.devcontainer/QUICK_START.md`
+- **Full Guide:** `.devcontainer/GUI_SETUP.md`
+- **DevContainer Info:** `.devcontainer/README.md`
+
+---
+
+## Summary
+
+✅ **Before:** Tauri apps crashed with GTK errors  
+✅ **After:** Full GUI support with browser-based desktop  
+
+✅ **Before:** No way to see the app window  
+✅ **After:** Access via http://localhost:6080/vnc.html  
+
+✅ **Before:** Manual X11 setup required  
+✅ **After:** Automatic setup on container start  
+
+---
+
+## Next Steps
+
+1. **Rebuild the container** (required!)
+2. **Open browser to localhost:6080/vnc.html**
+3. **Run `npm run tauri:dev`**
+4. **See your app in the browser desktop!**
+
+🎉 You're ready to develop Tauri apps in the DevContainer!
+
+---
+
+**Questions?** Check `.devcontainer/GUI_SETUP.md` for detailed troubleshooting.

@@ -1,20 +1,123 @@
-// The Dev Container format allows you to configure your environment. At the heart of it
-// is a Docker image or Dockerfile which controls the tools available in your environment.
-//
-// See https://aka.ms/devcontainer.json for more information.
 {
-	"name": "Gitpod",
-	// Use "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
-	// instead of the build to use a pre-built image.
+	"name": "Shollu - Tauri + React + TypeScript",
 	"build": {
-        "context": ".",
-        "dockerfile": "Dockerfile"
-    }
-	// Features add additional features to your environment. See https://containers.dev/features
-	// Beware: features are not supported on all platforms and may have unintended side-effects.
-	// "features": {
-    //   "ghcr.io/devcontainers/features/docker-in-docker": {
-    //     "moby": false
-    //   }
-    // }
+		"context": ".",
+		"dockerfile": "Dockerfile"
+	},
+	
+	// Configure tool-specific properties
+	"customizations": {
+		"vscode": {
+			// VS Code extensions
+			"extensions": [
+				// Rust
+				"rust-lang.rust-analyzer",
+				"tamasfe.even-better-toml",
+				
+				// TypeScript/JavaScript
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"bradlc.vscode-tailwindcss",
+				
+				// React
+				"dsznajder.es7-react-js-snippets",
+				
+				// General
+				"eamodio.gitlens",
+				"usernamehw.errorlens",
+				"streetsidesoftware.code-spell-checker",
+				"gruntfuggly.todo-tree",
+				
+				// Tauri specific
+				"tauri-apps.tauri-vscode"
+			],
+			
+			// VS Code settings
+			"settings": {
+				// Editor
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": "esbenp.prettier-vscode",
+				"editor.codeActionsOnSave": {
+					"source.fixAll.eslint": "explicit"
+				},
+				"editor.tabSize": 2,
+				"editor.rulers": [100],
+				
+				// Files
+				"files.eol": "\n",
+				"files.trimTrailingWhitespace": true,
+				"files.insertFinalNewline": true,
+				
+				// TypeScript
+				"typescript.tsdk": "node_modules/typescript/lib",
+				"typescript.enablePromptUseWorkspaceTsdk": true,
+				
+				// Rust
+				"rust-analyzer.checkOnSave.command": "clippy",
+				"rust-analyzer.cargo.features": "all",
+				
+				// Tailwind
+				"tailwindCSS.experimental.classRegex": [
+					["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+				],
+				
+				// Prettier
+				"[typescript]": {
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
+				},
+				"[typescriptreact]": {
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
+				},
+				"[javascript]": {
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
+				},
+				"[json]": {
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
+				},
+				"[rust]": {
+					"editor.defaultFormatter": "rust-lang.rust-analyzer"
+				}
+			}
+		}
+	},
+	
+	// Forward ports for development
+	"forwardPorts": [1420, 1430, 5900, 6080],
+	"portsAttributes": {
+		"1420": {
+			"label": "Vite Dev Server",
+			"onAutoForward": "notify"
+		},
+		"1430": {
+			"label": "Tauri App",
+			"onAutoForward": "ignore"
+		},
+		"5900": {
+			"label": "VNC Server",
+			"onAutoForward": "ignore"
+		},
+		"6080": {
+			"label": "noVNC (Browser VNC)",
+			"onAutoForward": "notify"
+		}
+	},
+	
+	// Use 'postCreateCommand' to run commands after the container is created
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	
+	// Start display server on container start
+	"postStartCommand": "bash .devcontainer/start-services.sh",
+	
+	// Set environment variables
+	"remoteEnv": {
+		"RUST_BACKTRACE": "1",
+		"DISPLAY": ":99"
+	},
+	
+	// Run as root (required for some Tauri operations)
+	"remoteUser": "root",
+	
+	// Mount the workspace
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+	"workspaceFolder": "/workspace"
 }
