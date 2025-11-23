@@ -26,6 +26,12 @@ You are an expert full-stack engineer specializing in Tauri, React 19, TypeScrip
 - One component per folder for complex components.
 - Simple components can be single files.
 
+### Documentation
+- **JSDoc REQUIRED** for all exported functions, components, and types.
+- Document parameters, return types, and purpose.
+- Explain WHY, not WHAT (code should be self-explanatory).
+- Include examples for complex functions.
+
 ### State Management
 - Use **Nanostores** for ALL global state. DO NOT use Redux or Context API.
 - Store naming: `$storeName` (e.g., `$prayerTimes`, `$settings`).
@@ -93,7 +99,7 @@ Other:
 - Tests: Always colocated with implementation
 - Types: Colocate if component-specific, global if shared
 
-### Component Pattern (Arrow Functions + Colocation)
+### Component Pattern (Arrow Functions + Colocation + JSDoc)
 ```typescript
 // components/PrayerCard/index.tsx
 import { useStore } from '@nanostores/react';
@@ -102,7 +108,18 @@ import { DateTime } from 'luxon';
 import { cn } from '@/lib/utils';
 import type { PrayerCardProps } from './types';
 
-// ✅ Arrow function component
+/**
+ * Displays a single prayer time in a card format.
+ * 
+ * @param props - Component props
+ * @param props.className - Optional CSS classes for styling
+ * @returns Prayer card component showing Fajr time
+ * 
+ * @example
+ * ```tsx
+ * <PrayerCard className="mb-4" />
+ * ```
+ */
 const PrayerCard = ({ className }: PrayerCardProps): JSX.Element => {
   const times = useStore($prayerTimes);
   
@@ -133,33 +150,63 @@ describe('PrayerCard', () => {
 });
 ```
 
-### Nanostores Pattern (Arrow Functions)
+### Nanostores Pattern (Arrow Functions + JSDoc)
 ```typescript
 // stores/prayer-times.ts
 import { map } from 'nanostores';
 
+/**
+ * Global store for prayer times.
+ * Contains all 6 prayer times for the current date.
+ */
 export const $prayerTimes = map<PrayerTimes>({
   date: '',
   fajr: '',
   dhuhr: '',
-  // ...
+  asr: '',
+  maghrib: '',
+  isha: '',
 });
 
-// ✅ Arrow function for actions
+/**
+ * Updates prayer times in the global store.
+ * 
+ * @param times - Partial prayer times to update
+ * 
+ * @example
+ * ```ts
+ * updatePrayerTimes({ fajr: '05:30:00', dhuhr: '12:15:00' });
+ * ```
+ */
 export const updatePrayerTimes = (times: Partial<PrayerTimes>): void => {
   $prayerTimes.set({ ...$prayerTimes.get(), ...times });
 };
 ```
 
-### Luxon Pattern (Arrow Functions)
+### Luxon Pattern (Arrow Functions + JSDoc)
 ```typescript
 import { DateTime } from 'luxon';
 
-// ✅ Arrow functions for utilities
+/**
+ * Formats a prayer time string from 24-hour format to HH:mm.
+ * 
+ * @param time - Time string in HH:mm:ss format
+ * @returns Formatted time string in HH:mm format
+ * 
+ * @example
+ * ```ts
+ * formatPrayerTime('05:30:00') // Returns '05:30'
+ * ```
+ */
 const formatPrayerTime = (time: string): string => {
   return DateTime.fromFormat(time, 'HH:mm:ss').toFormat('HH:mm');
 };
 
+/**
+ * Gets current time in Jakarta timezone.
+ * 
+ * @returns DateTime object in Asia/Jakarta timezone
+ */
 const getJakartaTime = (): DateTime => {
   return DateTime.now().setZone('Asia/Jakarta');
 };
@@ -190,6 +237,7 @@ const getJakartaTime = (): DateTime => {
 - DO NOT skip end-of-session checks (format, lint, test, build).
 - DO NOT implement features that differ from original Shollu v3 behavior.
 - DO NOT scatter related files. Colocate components with their tests and types.
+- DO NOT skip JSDoc documentation. All exported items MUST be documented.
 
 ## Project Plan & Status
 
@@ -660,11 +708,11 @@ const getJakartaTime = (): DateTime => {
 - Test store interactions
 - Test component behavior
 
-### Test Structure
+### Test Structure (with JSDoc)
 ```typescript
-// ✅ Good test example
+// lib/prayer-times/calculator.test.ts
 import { describe, it, expect } from 'vitest';
-import { calculatePrayerTimes } from '@/lib/prayer-times/calculator';
+import { calculatePrayerTimes } from './calculator';
 
 describe('calculatePrayerTimes', () => {
   it('should calculate correct Fajr time for Jakarta', () => {
@@ -677,7 +725,42 @@ describe('calculatePrayerTimes', () => {
     
     expect(result.fajr).toBe('04:30:00');
   });
+  
+  it('should handle timezone conversions correctly', () => {
+    // Test implementation
+  });
 });
+```
+
+### Function Documentation Example
+```typescript
+/**
+ * Calculates prayer times for a given date and location.
+ * Uses astronomical calculations based on the specified method.
+ * 
+ * @param params - Calculation parameters
+ * @param params.date - Date to calculate prayer times for
+ * @param params.latitude - Location latitude (-90 to 90)
+ * @param params.longitude - Location longitude (-180 to 180)
+ * @param params.method - Calculation method (MWL, ISNA, Egypt, etc.)
+ * @returns Object containing all 6 prayer times in HH:mm:ss format
+ * 
+ * @throws {Error} If latitude or longitude is out of range
+ * 
+ * @example
+ * ```ts
+ * const times = calculatePrayerTimes({
+ *   date: DateTime.now(),
+ *   latitude: -6.2088,
+ *   longitude: 106.8456,
+ *   method: 'MWL'
+ * });
+ * console.log(times.fajr); // '04:30:00'
+ * ```
+ */
+export const calculatePrayerTimes = (params: CalculationParams): PrayerTimes => {
+  // Implementation
+};
 ```
 
 ### Coverage Requirements
