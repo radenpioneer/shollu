@@ -1,0 +1,869 @@
+# Shollu Rewrite - Complete Project Plan
+
+## Project Overview
+
+**Goal:** Rewrite Shollu from Delphi/Pascal to a modern, cross-platform application using Tauri + React + TypeScript.
+
+**Original:** Shollu v3.10 (Delphi 7, Windows-only, 271KB)  
+**Target:** Shollu v4.0 (Tauri + React 19, Cross-platform, ~5-10MB)
+
+**Timeline:** 9-10 weeks (full-time) or 18-20 weeks (part-time)
+
+---
+
+## Tech Stack
+
+### Frontend
+- **React 19.1.0** - Latest React with new features
+- **TypeScript 5.8.3** - Strict mode for type safety
+- **Luxon 3.7.2** - Date/time manipulation
+- **Nanostores 1.1.0** - Lightweight state management (334 bytes)
+- **Tailwind CSS 4.1.17** - Utility-first styling
+- **Framer Motion 12.x** - Animations
+- **Lucide React** - Icon library
+- **Vite 7.x** - Fast build tool
+
+### Backend (Tauri/Rust)
+- **Tauri 2.x** - Rust-based desktop framework
+- **SQLite** - Local database (via tauri-plugin-sql)
+- **Tokio** - Async runtime
+- **Serde** - Serialization
+
+### Tauri Plugins
+- `tauri-plugin-sql` - SQLite database
+- `tauri-plugin-notification` - System notifications
+- `tauri-plugin-autostart` - Launch on boot
+- `tauri-plugin-shell` - Execute commands
+- `tauri-plugin-dialog` - File dialogs
+- `tauri-plugin-fs` - File system access
+
+### Development Tools
+- **ESLint 9** - Linting (flat config)
+- **Prettier** - Code formatting
+- **Vitest** - Testing framework
+- **GitHub Actions** - CI/CD
+
+---
+
+## Architecture
+
+### Component Structure
+```
+src/
+├── components/
+│   ├── Layout/           # AppLayout, Sidebar, Header
+│   ├── MainPage/         # Prayer times display
+│   ├── Schedule/         # Schedule viewer
+│   ├── Tasks/            # Task manager
+│   ├── Settings/         # Settings panel
+│   ├── Converter/        # Date converter
+│   ├── LocationPicker/   # City/coordinates selector
+│   └── About/            # About dialog
+├── lib/
+│   ├── prayer-times/     # Calculation engine
+│   ├── hijri/            # Hijri calendar
+│   ├── db/               # Database layer
+│   ├── audio/            # Audio playback
+│   └── scheduler/        # Task scheduling
+├── stores/               # Nanostores
+├── hooks/                # Custom React hooks
+├── types/                # TypeScript types
+└── assets/               # Static assets
+```
+
+### State Management (Nanostores)
+- `$settings` - App settings
+- `$prayerTimes` - Prayer times data
+- `$currentTime` - Live clock
+- `$currentPrayer` - Current prayer (computed)
+- `$nextPrayer` - Next prayer (computed)
+- `$tasks` - Task list
+- `$currentView` - Active view
+- `$sidebarOpen` - Sidebar state
+
+### Database Schema
+```sql
+-- Settings
+CREATE TABLE settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+-- Prayer times cache
+CREATE TABLE prayer_times_cache (
+  date TEXT PRIMARY KEY,
+  fajr TEXT,
+  sunrise TEXT,
+  dhuhr TEXT,
+  asr TEXT,
+  maghrib TEXT,
+  isha TEXT
+);
+
+-- Tasks
+CREATE TABLE tasks (
+  id INTEGER PRIMARY KEY,
+  name TEXT,
+  type TEXT,
+  frequency TEXT,
+  time TEXT,
+  day_of_week INTEGER,
+  day_of_month INTEGER,
+  month INTEGER,
+  message TEXT,
+  command TEXT,
+  media_file TEXT,
+  enabled BOOLEAN,
+  created_at TEXT,
+  last_executed TEXT
+);
+
+-- Cities (pre-populated)
+CREATE TABLE cities (
+  id INTEGER PRIMARY KEY,
+  name TEXT,
+  country TEXT,
+  latitude REAL,
+  longitude REAL,
+  timezone TEXT
+);
+```
+
+---
+
+## Implementation Phases
+
+### ✅ Phase 1: Foundation (COMPLETE - Week 1-2)
+
+**Status:** ✅ Complete  
+**Duration:** ~1 hour  
+**Commit:** `dbd1085`
+
+#### Completed Tasks:
+- [x] Initialize Tauri + React + TypeScript project
+- [x] Configure TypeScript (strict mode, path aliases)
+- [x] Install core dependencies
+- [x] Setup project directory structure
+- [x] Install and configure Tauri plugins
+- [x] Create TypeScript type definitions
+- [x] Create Nanostores for state management
+- [x] Create basic layout components
+- [x] Create placeholder components for all views
+- [x] Update App.tsx and main.tsx
+- [x] Setup ESLint and Prettier
+- [x] Test and verify application runs
+- [x] Add GUI support (Xvfb + VNC + noVNC)
+- [x] Document everything
+
+#### Deliverables:
+- ✅ Working Tauri app with navigation
+- ✅ Live clock (updates every second)
+- ✅ 6 placeholder views
+- ✅ Type-safe stores
+- ✅ Production build working (~95KB gzipped)
+- ✅ DevContainer with GUI support
+- ✅ Complete documentation
+
+---
+
+### 🔜 Phase 2: Prayer Time Calculations (Week 2-3)
+
+**Status:** 🔜 Ready to start  
+**Estimated Duration:** 1-2 weeks
+
+#### Tasks:
+- [ ] Port prayer time calculation algorithms from Shollu.pas
+- [ ] Implement all 5 calculation methods:
+  - [ ] Muslim World League (MWL)
+  - [ ] Islamic Society of North America (ISNA)
+  - [ ] Egyptian General Authority of Survey
+  - [ ] Umm Al-Qura University, Makkah
+  - [ ] University of Islamic Sciences, Karachi
+- [ ] Add Qibla direction calculation
+- [ ] Create location/city database (import from original)
+- [ ] Implement timezone handling with Luxon
+- [ ] Add prayer time adjustments (±minutes per prayer)
+- [ ] Implement Asr calculation (Standard vs Hanafi)
+- [ ] Create prayer time hooks (usePrayerTimes)
+- [ ] Write unit tests for calculations
+- [ ] Validate against original Shollu calculations
+
+#### Deliverables:
+- Prayer time calculation engine
+- Location database with search
+- Qibla direction calculator
+- Unit tests with 100% accuracy
+- Working MainPage with real prayer times
+
+#### Technical Details:
+
+**Prayer Time Calculation:**
+```typescript
+interface CalculationParams {
+  date: DateTime;
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  timezone: string;
+  method: CalculationMethod;
+  asrCalculation: AsrCalculation;
+  adjustments: PrayerAdjustments;
+}
+
+function calculatePrayerTimes(params: CalculationParams): PrayerTimes {
+  // Port algorithm from Shollu.pas
+  // 1. Calculate sun position
+  // 2. Calculate prayer times based on method
+  // 3. Apply adjustments
+  // 4. Return formatted times
+}
+```
+
+**Qibla Calculation:**
+```typescript
+function calculateQibla(latitude: number, longitude: number): number {
+  // Calculate bearing to Kaaba (21.4225°N, 39.8262°E)
+  // Return angle in degrees
+}
+```
+
+---
+
+### Phase 3: Main Features (Week 3-5)
+
+**Status:** ⏳ Pending  
+**Estimated Duration:** 2-3 weeks
+
+#### Tasks:
+- [ ] Implement MainPage with prayer times display
+  - [ ] Current prayer indicator
+  - [ ] Next prayer countdown
+  - [ ] Prayer times for today
+  - [ ] Qibla compass
+- [ ] Implement Schedule viewer
+  - [ ] Yesterday's times
+  - [ ] Today's times
+  - [ ] Tomorrow's times
+  - [ ] Calendar navigation
+- [ ] Implement Settings panel
+  - [ ] Location settings with search
+  - [ ] Calculation method selection
+  - [ ] Prayer time adjustments
+  - [ ] Appearance settings (theme, language)
+  - [ ] Notification settings
+  - [ ] Audio settings
+- [ ] Implement Hijri-Gregorian date converter
+  - [ ] Bidirectional conversion
+  - [ ] Hijri adjustment setting
+  - [ ] Calendar display
+- [ ] Implement location picker
+  - [ ] City search
+  - [ ] Manual coordinates
+  - [ ] Timezone detection
+  - [ ] Save favorite locations
+- [ ] Database integration
+  - [ ] Settings persistence
+  - [ ] Prayer times caching
+  - [ ] City database
+- [ ] Theme system
+  - [ ] Light/dark mode
+  - [ ] Custom color schemes
+  - [ ] Font size adjustment
+
+#### Deliverables:
+- Fully functional prayer times display
+- Working schedule viewer
+- Complete settings panel
+- Date converter
+- Location picker with search
+- Database persistence
+- Theme system
+
+---
+
+### Phase 4: Notifications & Audio (Week 5-6)
+
+**Status:** ⏳ Pending  
+**Estimated Duration:** 1-2 weeks
+
+#### Tasks:
+- [ ] System tray integration
+  - [ ] Tray icon with menu
+  - [ ] Show/hide window
+  - [ ] Quick prayer times view
+  - [ ] Exit option
+- [ ] Background timer service
+  - [ ] Check prayer times every minute
+  - [ ] Trigger notifications
+  - [ ] Update tray icon
+- [ ] Notification system
+  - [ ] System notifications
+  - [ ] Custom notification dialog
+  - [ ] Notification settings (timing, style)
+- [ ] Adhan audio playback
+  - [ ] Load audio files
+  - [ ] Play at prayer time
+  - [ ] Volume control
+  - [ ] Pause/stop controls
+- [ ] Dua after adhan
+  - [ ] Optional dua playback
+  - [ ] Custom dua files
+- [ ] Notification effects
+  - [ ] Fade in/out
+  - [ ] Slide animations
+  - [ ] Custom positioning
+
+#### Deliverables:
+- System tray with menu
+- Background service
+- System notifications
+- Adhan playback
+- Dua after adhan
+- Notification effects
+
+#### Technical Details:
+
+**Background Service (Rust):**
+```rust
+// src-tauri/src/scheduler.rs
+pub struct PrayerScheduler {
+    next_prayer: Option<DateTime>,
+    settings: AppSettings,
+}
+
+impl PrayerScheduler {
+    pub fn check_prayer_time(&mut self) {
+        // Check if current time matches prayer time
+        // Trigger notification
+        // Play adhan
+    }
+}
+```
+
+**Audio Playback:**
+```typescript
+// lib/audio/player.ts
+class AudioPlayer {
+  private audio: HTMLAudioElement;
+  
+  async play(file: string, volume: number) {
+    this.audio = new Audio(file);
+    this.audio.volume = volume / 100;
+    await this.audio.play();
+  }
+  
+  pause() {
+    this.audio.pause();
+  }
+  
+  stop() {
+    this.audio.pause();
+    this.audio.currentTime = 0;
+  }
+}
+```
+
+---
+
+### Phase 5: Task Scheduler (Week 6-7)
+
+**Status:** ⏳ Pending  
+**Estimated Duration:** 1-2 weeks
+
+#### Tasks:
+- [ ] Task creation UI
+  - [ ] Task form with validation
+  - [ ] Task type selection
+  - [ ] Frequency options
+  - [ ] Time picker
+  - [ ] Day/month selection
+- [ ] Task types implementation
+  - [ ] Info messages
+  - [ ] Warning/error dialogs
+  - [ ] Command execution
+  - [ ] System shutdown
+  - [ ] System hibernate
+  - [ ] Multimedia playback
+- [ ] Task execution engine
+  - [ ] Check tasks every minute
+  - [ ] Execute based on frequency
+  - [ ] Track last execution
+  - [ ] Handle errors
+- [ ] Task management
+  - [ ] List all tasks
+  - [ ] Edit tasks
+  - [ ] Delete tasks
+  - [ ] Enable/disable tasks
+  - [ ] Task history
+- [ ] Task persistence
+  - [ ] Save to database
+  - [ ] Load on startup
+  - [ ] Export/import tasks
+
+#### Deliverables:
+- Task creation form
+- Task list with management
+- Task execution engine
+- All task types working
+- Task history/logs
+- Import/export functionality
+
+#### Technical Details:
+
+**Task Scheduler:**
+```typescript
+// lib/scheduler/task-scheduler.ts
+class TaskScheduler {
+  private tasks: Task[];
+  
+  shouldExecute(task: Task, now: DateTime): boolean {
+    // Check if task should run based on:
+    // - Frequency (daily, weekly, monthly, once)
+    // - Time
+    // - Day of week/month
+    // - Last execution
+  }
+  
+  async executeTask(task: Task) {
+    switch (task.type) {
+      case 'info':
+        showNotification(task.message);
+        break;
+      case 'command':
+        await executeCommand(task.command);
+        break;
+      case 'shutdown':
+        await shutdownSystem();
+        break;
+      // ... other types
+    }
+  }
+}
+```
+
+---
+
+### Phase 6: Advanced Features (Week 7-8)
+
+**Status:** ⏳ Pending  
+**Estimated Duration:** 1-2 weeks
+
+#### Tasks:
+- [ ] Auto-start on system boot
+  - [ ] Windows: Registry entry
+  - [ ] macOS: Launch Agent
+  - [ ] Linux: .desktop file
+  - [ ] Settings toggle
+- [ ] Drop zone (floating widget)
+  - [ ] Floating window
+  - [ ] Transparent background
+  - [ ] Always on top
+  - [ ] Snap to edges
+  - [ ] Customizable content
+- [ ] Keyboard shortcuts
+  - [ ] Global shortcuts
+  - [ ] In-app shortcuts
+  - [ ] Customizable bindings
+- [ ] Backup/restore settings
+  - [ ] Export settings to file
+  - [ ] Import settings from file
+  - [ ] Cloud sync (optional)
+- [ ] Import legacy Shollu3 settings
+  - [ ] Read Windows Registry
+  - [ ] Convert to new format
+  - [ ] Import tasks
+  - [ ] Import preferences
+- [ ] Multi-language support
+  - [ ] English
+  - [ ] Indonesian
+  - [ ] Arabic
+  - [ ] Javanese
+  - [ ] Sundanese
+  - [ ] (Port from original language packs)
+- [ ] Accessibility
+  - [ ] Screen reader support
+  - [ ] Keyboard navigation
+  - [ ] High contrast mode
+  - [ ] Font size adjustment
+
+#### Deliverables:
+- Auto-start functionality
+- Drop zone widget
+- Keyboard shortcuts
+- Backup/restore
+- Legacy import
+- Multi-language support
+- Accessibility features
+
+---
+
+### Phase 7: Polish & Testing (Week 8-9)
+
+**Status:** ⏳ Pending  
+**Estimated Duration:** 1-2 weeks
+
+#### Tasks:
+- [ ] Cross-platform testing
+  - [ ] Windows 10/11
+  - [ ] macOS 12+
+  - [ ] Ubuntu 20.04+
+  - [ ] Other Linux distros
+- [ ] Performance optimization
+  - [ ] Bundle size optimization
+  - [ ] Memory usage optimization
+  - [ ] Startup time optimization
+  - [ ] Battery usage optimization
+- [ ] UI/UX improvements
+  - [ ] Smooth animations
+  - [ ] Loading states
+  - [ ] Error states
+  - [ ] Empty states
+  - [ ] Responsive design
+- [ ] Error handling
+  - [ ] Graceful error recovery
+  - [ ] User-friendly error messages
+  - [ ] Error logging
+  - [ ] Crash reporting
+- [ ] Logging system
+  - [ ] Debug logs
+  - [ ] Error logs
+  - [ ] User action logs
+  - [ ] Log rotation
+- [ ] User documentation
+  - [ ] User guide
+  - [ ] FAQ
+  - [ ] Troubleshooting
+  - [ ] Video tutorials
+- [ ] Developer documentation
+  - [ ] API documentation
+  - [ ] Architecture guide
+  - [ ] Contributing guide
+  - [ ] Code comments
+
+#### Deliverables:
+- Tested on all platforms
+- Optimized performance
+- Polished UI/UX
+- Comprehensive error handling
+- Complete documentation
+- Ready for release
+
+---
+
+### Phase 8: Deployment (Week 9-10)
+
+**Status:** ⏳ Pending  
+**Estimated Duration:** 1-2 weeks
+
+#### Tasks:
+- [ ] Build installers
+  - [ ] Windows: .msi, .exe
+  - [ ] macOS: .dmg, .app
+  - [ ] Linux: .deb, .rpm, .AppImage
+- [ ] Code signing
+  - [ ] Windows: Authenticode
+  - [ ] macOS: Apple Developer ID
+  - [ ] Linux: GPG signature
+- [ ] Auto-updater setup
+  - [ ] Update server
+  - [ ] Update mechanism
+  - [ ] Release channels (stable, beta)
+- [ ] GitHub releases
+  - [ ] Release notes
+  - [ ] Changelog
+  - [ ] Download links
+  - [ ] Version tagging
+- [ ] Website/landing page
+  - [ ] Features showcase
+  - [ ] Screenshots
+  - [ ] Download links
+  - [ ] Documentation links
+- [ ] Migration guide
+  - [ ] From Shollu v3 to v4
+  - [ ] Settings migration
+  - [ ] Task migration
+  - [ ] FAQ
+- [ ] Community setup
+  - [ ] GitHub Discussions
+  - [ ] Issue templates
+  - [ ] Contributing guidelines
+  - [ ] Code of conduct
+- [ ] Marketing
+  - [ ] Social media announcement
+  - [ ] Blog post
+  - [ ] Demo video
+  - [ ] Press release
+
+#### Deliverables:
+- Installers for all platforms
+- Auto-updater working
+- GitHub releases
+- Website/landing page
+- Migration guide
+- Community setup
+- Marketing materials
+
+---
+
+## Success Metrics
+
+### Performance
+- ✅ Bundle size < 20MB (currently ~5-10MB)
+- ✅ Memory usage < 100MB (currently ~80MB with GUI)
+- ✅ Startup time < 2 seconds
+- ✅ Prayer time accuracy ±1 minute
+- ✅ Battery usage < 1% per hour
+
+### Quality
+- ✅ 90%+ test coverage for core logic
+- ✅ 0 critical bugs
+- ✅ < 5 known minor bugs
+- ✅ Accessibility score > 90%
+- ✅ Performance score > 90%
+
+### Compatibility
+- ✅ Windows 10/11
+- ✅ macOS 12+
+- ✅ Ubuntu 20.04+
+- ✅ Other major Linux distros
+
+### Features
+- ✅ All original Shollu v3 features
+- ✅ + Cross-platform support
+- ✅ + Modern UI/UX
+- ✅ + Better performance
+- ✅ + More customization
+
+---
+
+## Risk Management
+
+### Technical Risks
+
+**Risk 1: Prayer Time Accuracy**
+- **Impact:** High
+- **Probability:** Medium
+- **Mitigation:** 
+  - Port exact algorithms from original
+  - Create comprehensive test suite
+  - Validate against multiple sources
+  - Beta testing with users
+
+**Risk 2: Cross-Platform Compatibility**
+- **Impact:** High
+- **Probability:** Medium
+- **Mitigation:**
+  - Test on all platforms early
+  - Use Tauri's cross-platform APIs
+  - Have fallbacks for platform-specific features
+  - Community testing
+
+**Risk 3: Performance Issues**
+- **Impact:** Medium
+- **Probability:** Low
+- **Mitigation:**
+  - Profile early and often
+  - Optimize hot paths
+  - Use web workers for heavy tasks
+  - Lazy load components
+
+**Risk 4: Audio Playback Issues**
+- **Impact:** Medium
+- **Probability:** Medium
+- **Mitigation:**
+  - Test on all platforms
+  - Support multiple audio formats
+  - Fallback to system beep
+  - Allow custom audio files
+
+### Project Risks
+
+**Risk 1: Scope Creep**
+- **Impact:** High
+- **Probability:** High
+- **Mitigation:**
+  - Stick to original features first
+  - Document "nice to have" features for v4.1
+  - Regular scope reviews
+  - MVP approach
+
+**Risk 2: Timeline Delays**
+- **Impact:** Medium
+- **Probability:** Medium
+- **Mitigation:**
+  - Buffer time in estimates
+  - Prioritize core features
+  - Regular progress reviews
+  - Flexible release date
+
+**Risk 3: User Adoption**
+- **Impact:** High
+- **Probability:** Low
+- **Mitigation:**
+  - Easy migration from v3
+  - Comprehensive documentation
+  - Video tutorials
+  - Community engagement
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+- Prayer time calculations
+- Hijri date conversion
+- Task scheduling logic
+- Qibla calculations
+- Date/time utilities
+
+### Integration Tests
+- Settings persistence
+- Audio playback
+- Notification delivery
+- System tray interactions
+- Database operations
+
+### E2E Tests
+- Complete user workflows
+- Prayer time display
+- Task creation and execution
+- Settings changes
+- Import/export
+
+### Platform Tests
+- Windows 10/11
+- macOS 12+
+- Ubuntu 20.04+
+- Fedora
+- Arch Linux
+
+### Performance Tests
+- Startup time
+- Memory usage
+- CPU usage
+- Battery usage
+- Bundle size
+
+---
+
+## Documentation Plan
+
+### User Documentation
+- [ ] User guide (getting started)
+- [ ] Feature documentation
+- [ ] FAQ
+- [ ] Troubleshooting guide
+- [ ] Video tutorials
+- [ ] Migration guide from v3
+
+### Developer Documentation
+- [ ] Architecture overview
+- [ ] API documentation
+- [ ] Database schema
+- [ ] State management guide
+- [ ] Contributing guide
+- [ ] Code style guide
+
+### Project Documentation
+- [x] Project plan (this document)
+- [x] Phase 1 completion summary
+- [x] DevContainer setup guide
+- [ ] Release notes
+- [ ] Changelog
+- [ ] Roadmap
+
+---
+
+## Release Strategy
+
+### Version Numbering
+- **v4.0.0** - Initial release (feature parity with v3)
+- **v4.1.0** - Additional features
+- **v4.x.x** - Bug fixes and improvements
+
+### Release Channels
+- **Stable** - Tested, production-ready
+- **Beta** - Feature complete, testing phase
+- **Alpha** - Early access, may have bugs
+
+### Release Process
+1. Code freeze
+2. Final testing
+3. Build installers
+4. Code signing
+5. Create GitHub release
+6. Update website
+7. Announce on social media
+8. Monitor for issues
+
+---
+
+## Post-Launch Plan
+
+### v4.1.0 Features (Future)
+- Cloud sync for settings
+- Mobile companion app
+- Widget for desktop
+- Prayer time history/statistics
+- Customizable themes
+- Plugin system
+- API for third-party integrations
+
+### Maintenance
+- Bug fixes
+- Security updates
+- Dependency updates
+- Performance improvements
+- User feedback implementation
+
+### Community
+- GitHub Discussions
+- Discord server (optional)
+- Regular updates
+- Community contributions
+- Feature requests
+
+---
+
+## Resources
+
+### Documentation
+- [Tauri Documentation](https://tauri.app/)
+- [React 19 Documentation](https://react.dev/)
+- [Luxon Documentation](https://moment.github.io/luxon/)
+- [Nanostores Documentation](https://github.com/nanostores/nanostores)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+
+### Tools
+- [Vite](https://vitejs.dev/)
+- [Vitest](https://vitest.dev/)
+- [ESLint](https://eslint.org/)
+- [Prettier](https://prettier.io/)
+
+### Prayer Time Resources
+- [Prayer Times Calculation Methods](https://praytimes.org/calculation)
+- [Islamic Calendar Algorithms](https://www.staff.science.uu.nl/~gent0113/islam/islam_tabcal.htm)
+- [Qibla Direction Calculation](https://www.islamicfinder.org/qibla-direction/)
+
+---
+
+## Current Status
+
+**Phase:** Phase 1 ✅ Complete  
+**Next Phase:** Phase 2 (Prayer Time Calculations)  
+**Overall Progress:** ~10% complete  
+**Estimated Completion:** 8-9 weeks remaining
+
+---
+
+## Contact & Support
+
+**Repository:** https://github.com/radenpioneer/shollu  
+**Branch:** dev-20250609  
+**Original Author:** Ebta Setiawan (ebsoft)  
+**Rewrite:** 2024
+
+---
+
+**Last Updated:** November 23, 2024  
+**Version:** 1.0
