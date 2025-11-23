@@ -20,6 +20,12 @@ You are an expert full-stack engineer specializing in Tauri, React 19, TypeScrip
 - Explicit return types for arrow functions.
 - Functional components only (no class components).
 
+### File Organization
+- **Colocate related files** - Keep components, tests, and related files together in their own folder.
+- Structure: `ComponentName/index.tsx`, `ComponentName/ComponentName.test.tsx`
+- One component per folder for complex components.
+- Simple components can be single files.
+
 ### State Management
 - Use **Nanostores** for ALL global state. DO NOT use Redux or Context API.
 - Store naming: `$storeName` (e.g., `$prayerTimes`, `$settings`).
@@ -42,25 +48,59 @@ You are an expert full-stack engineer specializing in Tauri, React 19, TypeScrip
 - Log errors to console.
 - Show user-friendly messages (no technical jargon).
 
-- `src/components/`: UI components (Layout, MainPage, Schedule, Tasks, Settings, Converter, About)
-- `src/lib/`: Core logic (prayer-times, hijri, db, audio, scheduler)
-- `src/stores/`: Nanostores (settings.ts, prayer-times.ts, tasks.ts, ui.ts)
-- `src/types/`: TypeScript type definitions
-- `src/hooks/`: Custom React hooks
-- `src-tauri/`: Rust backend
-- `logs/`: Project documentation (PROJECT_PLAN.md, PHASE1_COMPLETE.md)
-- `shollu-old/`: Original Delphi code (reference only)
+## Project Structure
 
-### Component Pattern (Arrow Functions Only)
+```
+src/
+├── components/
+│   ├── PrayerCard/              # Colocated component
+│   │   ├── index.tsx            # Component implementation
+│   │   ├── PrayerCard.test.tsx  # Component tests
+│   │   └── types.ts             # Component-specific types
+│   ├── Layout/
+│   │   ├── AppLayout.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── Header.tsx
+│   └── MainPage/
+│       ├── index.tsx
+│       ├── PrayerTimesDisplay.tsx
+│       └── NextPrayerCard.tsx
+├── lib/
+│   ├── prayer-times/
+│   │   ├── calculator.ts
+│   │   ├── calculator.test.ts   # Colocated tests
+│   │   ├── methods.ts
+│   │   └── qibla.ts
+│   └── db/
+│       ├── client.ts
+│       └── schema.ts
+├── stores/
+│   ├── settings.ts
+│   ├── prayer-times.ts
+│   └── tasks.ts
+├── types/                       # Global types only
+├── hooks/                       # Custom React hooks
+└── assets/
+
+Other:
+- src-tauri/: Rust backend
+- shollu-old/: Original Delphi code (reference only)
+```
+
+**Colocation Rules:**
+- Complex components: Own folder with `index.tsx` + tests
+- Simple components: Single file in parent folder
+- Tests: Always colocated with implementation
+- Types: Colocate if component-specific, global if shared
+
+### Component Pattern (Arrow Functions + Colocation)
 ```typescript
+// components/PrayerCard/index.tsx
 import { useStore } from '@nanostores/react';
 import { $prayerTimes } from '@/stores/prayer-times';
 import { DateTime } from 'luxon';
 import { cn } from '@/lib/utils';
-
-interface PrayerCardProps {
-  className?: string;
-}
+import type { PrayerCardProps } from './types';
 
 // ✅ Arrow function component
 const PrayerCard = ({ className }: PrayerCardProps): JSX.Element => {
@@ -74,6 +114,23 @@ const PrayerCard = ({ className }: PrayerCardProps): JSX.Element => {
 };
 
 export default PrayerCard;
+
+// components/PrayerCard/types.ts
+export interface PrayerCardProps {
+  className?: string;
+}
+
+// components/PrayerCard/PrayerCard.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render } from '@testing-library/react';
+import PrayerCard from './index';
+
+describe('PrayerCard', () => {
+  it('should render prayer time', () => {
+    const { getByText } = render(<PrayerCard />);
+    expect(getByText(/fajr/i)).toBeInTheDocument();
+  });
+});
 ```
 
 ### Nanostores Pattern (Arrow Functions)
@@ -132,6 +189,7 @@ const getJakartaTime = (): DateTime => {
 - DO NOT skip tests. Every feature MUST have tests.
 - DO NOT skip end-of-session checks (format, lint, test, build).
 - DO NOT implement features that differ from original Shollu v3 behavior.
+- DO NOT scatter related files. Colocate components with their tests and types.
 
 ## Project Plan & Status
 
