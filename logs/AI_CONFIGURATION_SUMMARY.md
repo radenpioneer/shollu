@@ -15,7 +15,32 @@ Comprehensive AI agent guidelines and rules have been created to ensure consiste
 
 ## Files Created
 
-### 1. `.cursorrules` (Main Rules File)
+### 1. `AGENTS.md` (Open Standard - Primary)
+**Location:** `/workspace/AGENTS.md`  
+**Size:** ~5KB  
+**Purpose:** Universal AI agent instructions following open standard format
+
+**Contents:**
+- Identity: Who you are, project context, current phase
+- Tech Stack: Concise list of technologies
+- Code Style: Clear rules for TypeScript, React, Nanostores, Tailwind, Luxon
+- Project Structure: Directory layout
+- Code Examples: Practical patterns for components, stores, styling
+- Workflow Rules: Numbered steps (testing, formatting, commits)
+- Boundaries: Clear DO NOT rules
+- Current Task: Phase-specific guidance
+- Quick Reference: Common commands
+
+**Key Features:**
+- Follows AGENTS.md open standard
+- Concise and actionable (5KB vs 15KB)
+- Clear boundaries section
+- Practical code examples
+- Works with all AI tools
+
+---
+
+### 2. `.cursorrules` (Cursor-Specific Rules)
 **Location:** `/workspace/.cursorrules`  
 **Size:** ~15KB  
 **Purpose:** Complete coding rules and conventions for the project
@@ -49,7 +74,7 @@ Comprehensive AI agent guidelines and rules have been created to ensure consiste
 
 ---
 
-### 2. `.aidigestignore`
+### 3. `.aidigestignore`
 **Location:** `/workspace/.aidigestignore`  
 **Size:** ~500 bytes  
 **Purpose:** Specify files and directories AI agents should not analyze or modify
@@ -71,7 +96,7 @@ Comprehensive AI agent guidelines and rules have been created to ensure consiste
 
 ---
 
-### 3. `.ai/README.md`
+### 4. `.ai/README.md`
 **Location:** `/workspace/.ai/README.md`  
 **Size:** ~5KB  
 **Purpose:** Quick start guide for AI agents
@@ -95,33 +120,28 @@ Comprehensive AI agent guidelines and rules have been created to ensure consiste
 
 ---
 
-### 4. `AI_GUIDELINES.md`
-**Location:** `/workspace/AI_GUIDELINES.md`  
-**Size:** ~12KB  
-**Purpose:** Universal guidelines for all AI agents (Cursor, Copilot, etc.)
+
+**Location:** `/workspace/AGENTS.md`  
+**Size:** ~5KB  
+**Purpose:** Universal AI agent instructions following open standard format
 
 **Contents:**
-- Project overview
-- Essential reading list
-- Tech stack details
-- Critical DO/DON'T rules
-- Project structure
-- Code style examples
-- Documentation requirements
-- Git workflow
-- Testing checklist
-- Quick commands
-- Current phase tasks
-- Success criteria
-- Common issues and solutions
-- Resources and links
+- Identity section (who you are, project context)
+- Tech Stack (concise list)
+- Code Style (clear rules)
+- Project Structure (directory layout)
+- Code Examples (practical patterns)
+- Workflow Rules (numbered steps)
+- Boundaries (clear restrictions)
+- Current Task (phase-specific guidance)
+- Quick Reference (common commands)
 
 **Key Features:**
-- Universal format (works with any AI tool)
-- Signed with Ona signature
-- Clear examples
-- Comprehensive but scannable
-- Links to detailed docs
+- Follows open standard format (AGENTS.md)
+- Concise and scannable
+- Clear boundaries and restrictions
+- Practical code examples
+- Works with all AI tools (Cursor, Copilot, Codeium, etc.)
 
 ---
 
@@ -130,7 +150,7 @@ Comprehensive AI agent guidelines and rules have been created to ensure consiste
 ```
 AI Configuration Hierarchy:
 
-AI_GUIDELINES.md (Universal Entry Point)
+AGENTS.md (Open Standard Entry Point)
     ↓
 .cursorrules (Detailed Rules)
     ↓
@@ -140,8 +160,8 @@ logs/PROJECT_PLAN.md (Full Project Plan)
 ```
 
 **Reading Order for New AI Agents:**
-1. `AI_GUIDELINES.md` - Get overview and critical rules
-2. `.cursorrules` - Learn detailed conventions
+1. `AGENTS.md` - Get overview, rules, and boundaries (open standard)
+2. `.cursorrules` - Learn detailed conventions (Cursor-specific)
 3. `.ai/README.md` - Quick reference for common tasks
 4. `logs/PROJECT_PLAN.md` - Understand full scope
 
