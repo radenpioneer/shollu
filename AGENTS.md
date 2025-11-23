@@ -122,26 +122,74 @@ const formatted = jakarta.toFormat('HH:mm:ss');
 - DO NOT skip linting/formatting before commits.
 - DO NOT introduce new patterns without discussion.
 
-## Current Task: Phase 2
+## Project Phases
 
+### ✅ Phase 1: Foundation (Complete)
+- Tauri + React + TypeScript project initialized
+- Type definitions, stores, components created
+- DevContainer with GUI support (Xvfb + VNC)
+- ESLint, Prettier, Tailwind configured
+- Production build working (~95KB gzipped)
+
+### 🔜 Phase 2: Prayer Time Calculations (Current)
 **Goal:** Implement prayer time calculation engine.
 
-**Priority:**
-1. Port algorithms from `shollu-old/Shollu.pas` (maintain exact compatibility).
-2. Implement 5 calculation methods: MWL, ISNA, Egypt, Makkah, Karachi.
-3. Support Standard and Hanafi Asr calculations.
-4. Use Luxon for timezone handling.
-5. Accuracy requirement: ±1 minute vs original Shollu v3.
+**Tasks:**
+1. Port algorithms from `shollu-old/Shollu.pas` (maintain exact compatibility)
+2. Implement 5 calculation methods: MWL, ISNA, Egypt, Makkah, Karachi
+3. Support Standard and Hanafi Asr calculations
+4. Add Qibla direction calculation
+5. Create location/city database
+6. Use Luxon for timezone handling
+7. Support prayer time adjustments (±minutes per prayer)
+8. Write unit tests
+9. Accuracy requirement: ±1 minute vs original Shollu v3
 
-**See:** `logs/PROJECT_PLAN.md` for full details.
+### ⏳ Phase 3-8: Upcoming
+- Phase 3: Main Features (MainPage, Schedule, Settings, Converter)
+- Phase 4: Notifications & Audio (System tray, Adhan playback)
+- Phase 5: Task Scheduler (Task creation, execution engine)
+- Phase 6: Advanced Features (Auto-start, drop zone, multi-language)
+- Phase 7: Polish & Testing (Cross-platform testing, optimization)
+- Phase 8: Deployment (Installers, auto-updater, releases)
+
+**Timeline:** 8-9 weeks remaining (~10% complete)
+
+## DevContainer Setup
+
+**GUI Support:** Xvfb + VNC + noVNC for running Tauri apps in container.
+
+**Access:** http://localhost:6080/vnc.html (browser-based desktop)
+
+**Services:**
+- Port 5900: VNC server
+- Port 6080: noVNC (browser access)
+- Port 1420: Vite dev server
+
+**Start services:** `bash .devcontainer/start-services.sh`
 
 ## Quick Reference
 
 ```bash
-npm run tauri:dev    # Start app
+# Development
+npm run tauri:dev    # Start app (opens in VNC desktop)
+npm run dev          # Vite dev server only
+
+# Code Quality
 npm run lint         # Check errors
+npm run lint:fix     # Auto-fix errors
 npm run format       # Format code
 npm run build        # Build project
+
+# Rust
+cd src-tauri
+cargo check          # Check Rust code
+cargo clippy         # Lint Rust
+cargo fmt            # Format Rust
 ```
 
-**Documentation:** `.cursorrules` (detailed rules), `logs/PROJECT_PLAN.md` (full plan), `.ai/README.md` (quick guide)
+## Additional Resources
+
+**Detailed Rules:** `.cursorrules` - Complete coding conventions and patterns  
+**Quick Guide:** `.ai/README.md` - Common patterns and examples  
+**Original Code:** `shollu-old/` - Reference only (DO NOT MODIFY)
