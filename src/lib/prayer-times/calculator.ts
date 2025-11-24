@@ -77,7 +77,7 @@ const addMinutes = (timeString: string, minutes: number): string => {
   const h = parts[0] || 0;
   const m = parts[1] || 0;
   const s = parts[2] || 0;
-  
+
   const totalMinutes = h * 60 + m + minutes;
   const hours = Math.floor(totalMinutes / 60) % 24;
   const mins = totalMinutes % 60;
@@ -149,11 +149,15 @@ export const calculatePrayerTimes = (options: CalculationOptions): PrayerTimes =
 
   // Calculate Fajr (dawn) - sun at fajrAngle degrees below horizon
   const fajrHourAngle = getHourAngle(latitude, declination, -methodConfig.fajrAngle);
-  const fajrTime = solarNoon - fajrHourAngle;
+  let fajrTime = solarNoon - fajrHourAngle;
 
   // Calculate Sunrise - sun at horizon with altitude correction
   const sunriseHourAngle = getSunriseHourAngle(latitude, declination, altitude);
   const sunriseTime = solarNoon - sunriseHourAngle;
+
+  // High latitude adjustment for Fajr: if Fajr is invalid (after sunrise or wraps),
+  // use 1/7th of night method (Fajr = Sunrise - 1/7 of night duration)
+  // We'll apply this after calculating Maghrib
 
   // Dhuhr is solar noon
   const dhuhrTime = solarNoon;
@@ -166,6 +170,13 @@ export const calculatePrayerTimes = (options: CalculationOptions): PrayerTimes =
   // Calculate Maghrib (sunset) - same as sunrise but after noon
   const maghribTime = solarNoon + sunriseHourAngle;
 
+  // Apply high latitude adjustment for Fajr if needed
+  if (fajrTime >= sunriseTime || fajrTime < 0) {
+    const nightDuration = 24 - maghribTime + sunriseTime;
+    fajrTime = sunriseTime - nightDuration / 7;
+    if (fajrTime < 0) fajrTime += 24;
+  }
+
   // Calculate Isha (night) - sun at ishaAngle degrees below horizon
   // Special case for Makkah method: Isha is 90 minutes after Maghrib
   let ishaTime: number;
@@ -174,6 +185,13 @@ export const calculatePrayerTimes = (options: CalculationOptions): PrayerTimes =
   } else {
     const ishaHourAngle = getHourAngle(latitude, declination, -methodConfig.ishaAngle);
     ishaTime = solarNoon + ishaHourAngle;
+
+    // High latitude adjustment: if Isha is invalid (wraps to next day or same as Fajr),
+    // use 1/7th of night method (Isha = Maghrib + 1/7 of night duration)
+    if (ishaTime >= 24 || ishaTime <= fajrTime) {
+      const nightDuration = 24 - maghribTime + fajrTime;
+      ishaTime = maghribTime + nightDuration / 7;
+    }
   }
 
   // Convert to time strings

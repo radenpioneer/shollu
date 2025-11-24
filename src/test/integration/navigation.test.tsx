@@ -13,13 +13,13 @@ describe('Navigation Integration Tests', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    // Start at main view
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    // Start at main view - check for prayer names
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
 
     // Navigate to Schedule
     await user.click(screen.getByText('Schedule'));
     expect(screen.getByText(/Schedule for yesterday, today, and tomorrow/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Prayer times will be displayed here/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Fajr')).not.toBeInTheDocument();
 
     // Navigate to Tasks
     await user.click(screen.getByText('Tasks'));
@@ -43,7 +43,7 @@ describe('Navigation Integration Tests', () => {
 
     // Navigate back to Prayer Times
     await user.click(screen.getByText('Prayer Times'));
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
     expect(screen.queryByText('Shollu v4.0.0')).not.toBeInTheDocument();
   });
 
@@ -141,8 +141,8 @@ describe('Navigation Integration Tests', () => {
     await user.click(screen.getByText('About'));
     await user.click(screen.getByText('Prayer Times'));
 
-    // Should end up at Prayer Times
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    // Should end up at Prayer Times - check for prayer names
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
     expect($currentView.get()).toBe('main');
   });
 
@@ -160,6 +160,6 @@ describe('Navigation Integration Tests', () => {
 
     $currentView.set('main');
     rerender(<App />);
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
   });
 });

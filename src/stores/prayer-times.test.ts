@@ -1,20 +1,19 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { DateTime } from 'luxon';
-import { $currentTime, $prayerTimes, $currentPrayer, $nextPrayer } from './prayer-times';
+import {
+  $currentTime,
+  $prayerTimes,
+  $currentPrayer,
+  $nextPrayer,
+  updatePrayerTimes,
+} from './prayer-times';
+import { $settings } from './settings';
 
 describe('Prayer Times Store', () => {
   beforeEach(() => {
-    // Reset stores
+    // Reset current time
     $currentTime.set(DateTime.now());
-    $prayerTimes.set({
-      date: DateTime.now().toISODate() || '',
-      fajr: '',
-      sunrise: '',
-      dhuhr: '',
-      asr: '',
-      maghrib: '',
-      isha: '',
-    });
+    // Note: We don't reset $prayerTimes here because it auto-calculates on init
   });
 
   afterEach(() => {
@@ -62,14 +61,19 @@ describe('Prayer Times Store', () => {
       expect(times).toHaveProperty('isha');
     });
 
-    it('should have empty strings for prayer times initially', () => {
+    it('should calculate real prayer times on initialization', () => {
       const times = $prayerTimes.get();
-      expect(times.fajr).toBe('');
-      expect(times.sunrise).toBe('');
-      expect(times.dhuhr).toBe('');
-      expect(times.asr).toBe('');
-      expect(times.maghrib).toBe('');
-      expect(times.isha).toBe('');
+      // Should have calculated times (not empty strings)
+      expect(times.fajr).not.toBe('');
+      expect(times.sunrise).not.toBe('');
+      expect(times.dhuhr).not.toBe('');
+      expect(times.asr).not.toBe('');
+      expect(times.maghrib).not.toBe('');
+      expect(times.isha).not.toBe('');
+
+      // Should be valid time format (HH:mm:ss)
+      expect(times.fajr).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+      expect(times.dhuhr).toMatch(/^\d{2}:\d{2}:\d{2}$/);
     });
 
     it('should have current date initially', () => {
@@ -118,12 +122,7 @@ describe('Prayer Times Store', () => {
   });
 
   describe('$currentPrayer computed store', () => {
-    it('should return null initially (not implemented)', () => {
-      const currentPrayer = $currentPrayer.get();
-      expect(currentPrayer).toBeNull();
-    });
-
-    it('should be reactive to prayer times changes', () => {
+    it('should return correct prayer for morning time', () => {
       $prayerTimes.set({
         date: '2024-01-15',
         fajr: '05:30:00',
@@ -133,29 +132,47 @@ describe('Prayer Times Store', () => {
         maghrib: '18:00:00',
         isha: '19:15:00',
       });
+      $currentTime.set(DateTime.fromISO('2024-01-15T06:00:00'));
 
-      // Will be implemented in Phase 2
       const currentPrayer = $currentPrayer.get();
-      expect(currentPrayer).toBeNull();
+      expect(currentPrayer).toBe('fajr');
     });
 
-    it('should be reactive to current time changes', () => {
-      const testTime = DateTime.fromISO('2024-01-15T14:00:00');
-      $currentTime.set(testTime);
+    it('should return correct prayer for afternoon time', () => {
+      $prayerTimes.set({
+        date: '2024-01-15',
+        fajr: '05:30:00',
+        sunrise: '06:45:00',
+        dhuhr: '12:15:00',
+        asr: '15:30:00',
+        maghrib: '18:00:00',
+        isha: '19:15:00',
+      });
+      $currentTime.set(DateTime.fromISO('2024-01-15T14:00:00'));
 
-      // Will be implemented in Phase 2
       const currentPrayer = $currentPrayer.get();
-      expect(currentPrayer).toBeNull();
+      expect(currentPrayer).toBe('dhuhr');
+    });
+
+    it('should return isha for time before fajr', () => {
+      $prayerTimes.set({
+        date: '2024-01-15',
+        fajr: '05:30:00',
+        sunrise: '06:45:00',
+        dhuhr: '12:15:00',
+        asr: '15:30:00',
+        maghrib: '18:00:00',
+        isha: '19:15:00',
+      });
+      $currentTime.set(DateTime.fromISO('2024-01-15T03:00:00'));
+
+      const currentPrayer = $currentPrayer.get();
+      expect(currentPrayer).toBe('isha');
     });
   });
 
   describe('$nextPrayer computed store', () => {
-    it('should return null initially (not implemented)', () => {
-      const nextPrayer = $nextPrayer.get();
-      expect(nextPrayer).toBeNull();
-    });
-
-    it('should be reactive to prayer times changes', () => {
+    it('should return fajr when before fajr time', () => {
       $prayerTimes.set({
         date: '2024-01-15',
         fajr: '05:30:00',
@@ -165,19 +182,82 @@ describe('Prayer Times Store', () => {
         maghrib: '18:00:00',
         isha: '19:15:00',
       });
+      $currentTime.set(DateTime.fromISO('2024-01-15T03:00:00'));
 
-      // Will be implemented in Phase 2
       const nextPrayer = $nextPrayer.get();
-      expect(nextPrayer).toBeNull();
+      expect(nextPrayer).toEqual({ prayer: 'fajr', time: '05:30:00' });
     });
 
-    it('should be reactive to current time changes', () => {
-      const testTime = DateTime.fromISO('2024-01-15T14:00:00');
-      $currentTime.set(testTime);
+    it('should return dhuhr when between sunrise and dhuhr', () => {
+      $prayerTimes.set({
+        date: '2024-01-15',
+        fajr: '05:30:00',
+        sunrise: '06:45:00',
+        dhuhr: '12:15:00',
+        asr: '15:30:00',
+        maghrib: '18:00:00',
+        isha: '19:15:00',
+      });
+      $currentTime.set(DateTime.fromISO('2024-01-15T10:00:00'));
 
-      // Will be implemented in Phase 2
       const nextPrayer = $nextPrayer.get();
-      expect(nextPrayer).toBeNull();
+      expect(nextPrayer).toEqual({ prayer: 'dhuhr', time: '12:15:00' });
+    });
+
+    it('should return fajr when after isha', () => {
+      $prayerTimes.set({
+        date: '2024-01-15',
+        fajr: '05:30:00',
+        sunrise: '06:45:00',
+        dhuhr: '12:15:00',
+        asr: '15:30:00',
+        maghrib: '18:00:00',
+        isha: '19:15:00',
+      });
+      $currentTime.set(DateTime.fromISO('2024-01-15T22:00:00'));
+
+      const nextPrayer = $nextPrayer.get();
+      expect(nextPrayer).toEqual({ prayer: 'fajr', time: '05:30:00' });
+    });
+  });
+
+  describe('updatePrayerTimes function', () => {
+    it('should calculate prayer times for current date', () => {
+      updatePrayerTimes();
+
+      const times = $prayerTimes.get();
+      expect(times.date).toBe(DateTime.now().toISODate());
+      expect(times.fajr).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+      expect(times.dhuhr).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+    });
+
+    it('should calculate prayer times for specific date', () => {
+      const targetDate = DateTime.fromISO('2024-06-21', { zone: 'Asia/Jakarta' });
+      updatePrayerTimes(targetDate);
+
+      const times = $prayerTimes.get();
+      expect(times.date).toBe('2024-06-21');
+      expect(times.fajr).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+    });
+
+    it('should use settings from $settings store', () => {
+      // Update settings to a known location
+      $settings.set({
+        ...$settings.get(),
+        location: {
+          latitude: -6.2088,
+          longitude: 106.8456,
+          timezone: 'Asia/Jakarta',
+          altitude: 0,
+        },
+        calculationMethod: 'MWL',
+      });
+
+      updatePrayerTimes();
+
+      const times = $prayerTimes.get();
+      // Should have calculated times based on Jakarta location
+      expect(times.fajr).toMatch(/^\d{2}:\d{2}:\d{2}$/);
     });
   });
 

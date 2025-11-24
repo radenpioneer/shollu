@@ -32,7 +32,9 @@ describe('AppLayout Component', () => {
     $currentView.set('main');
     render(<AppLayout />);
     expect(screen.getAllByText('Prayer Times').length).toBeGreaterThan(0);
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    // Check for prayer names instead of placeholder text
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
+    expect(screen.getByText('Dhuhr')).toBeInTheDocument();
   });
 
   it('should render ScheduleView when view is schedule', () => {
@@ -73,14 +75,14 @@ describe('AppLayout Component', () => {
   it('should switch views correctly', () => {
     const { rerender } = render(<AppLayout />);
 
-    // Start with main
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    // Start with main - check for prayer names
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
 
     // Switch to settings
     $currentView.set('settings');
     rerender(<AppLayout />);
     expect(screen.getByText(/Application settings will be displayed here/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Prayer times will be displayed here/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Fajr')).not.toBeInTheDocument();
 
     // Switch to about
     $currentView.set('about');
@@ -108,8 +110,8 @@ describe('AppLayout Component', () => {
     $currentView.set('main');
     render(<AppLayout />);
 
-    // Should have main view
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    // Should have main view (check for prayer names)
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
 
     // Should not have other views
     expect(screen.queryByText(/Schedule for yesterday/i)).not.toBeInTheDocument();

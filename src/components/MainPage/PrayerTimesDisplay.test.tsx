@@ -1,9 +1,25 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@/test/test-utils';
+import { DateTime } from 'luxon';
 import PrayerTimesDisplay from './PrayerTimesDisplay';
+import { $prayerTimes, $currentTime } from '@/stores/prayer-times';
 
 describe('PrayerTimesDisplay Component', () => {
+  beforeEach(() => {
+    // Set up test prayer times
+    $prayerTimes.set({
+      date: '2024-01-15',
+      fajr: '05:30:00',
+      sunrise: '06:45:00',
+      dhuhr: '12:15:00',
+      asr: '15:30:00',
+      maghrib: '18:00:00',
+      isha: '19:15:00',
+    });
+    $currentTime.set(DateTime.fromISO('2024-01-15T10:00:00'));
+  });
+
   it('should render without crashing', () => {
     render(<PrayerTimesDisplay />);
     expect(screen.getByText('Prayer Times')).toBeInTheDocument();
@@ -16,21 +32,34 @@ describe('PrayerTimesDisplay Component', () => {
     expect(heading).toHaveClass('text-2xl', 'font-bold');
   });
 
-  it('should display placeholder message', () => {
+  it('should display all 6 prayer times', () => {
     render(<PrayerTimesDisplay />);
-    expect(screen.getByText(/Prayer times will be displayed here/i)).toBeInTheDocument();
+    expect(screen.getByText('Fajr')).toBeInTheDocument();
+    expect(screen.getByText('Sunrise')).toBeInTheDocument();
+    expect(screen.getByText('Dhuhr')).toBeInTheDocument();
+    expect(screen.getByText('Asr')).toBeInTheDocument();
+    expect(screen.getByText('Maghrib')).toBeInTheDocument();
+    expect(screen.getByText('Isha')).toBeInTheDocument();
   });
 
-  it('should have correct container structure', () => {
+  it('should display formatted prayer times (HH:mm)', () => {
     render(<PrayerTimesDisplay />);
-    const container = screen.getByText('Prayer Times').parentElement;
-    expect(container).toHaveClass('space-y-6');
+    expect(screen.getByText('05:30')).toBeInTheDocument(); // Fajr
+    expect(screen.getAllByText('12:15').length).toBeGreaterThan(0); // Dhuhr (appears in card and next prayer)
+    expect(screen.getByText('19:15')).toBeInTheDocument(); // Isha
   });
 
-  it('should have styled content card', () => {
+  it('should display next prayer card', () => {
     render(<PrayerTimesDisplay />);
-    const card = screen.getByText(/Prayer times will be displayed here/i).closest('div');
-    expect(card).toHaveClass('bg-white', 'dark:bg-gray-800', 'rounded-lg', 'p-6', 'shadow-sm');
+    expect(screen.getByText('Next Prayer')).toBeInTheDocument();
+    // At 10:00, next prayer should be Dhuhr at 12:15
+    expect(screen.getByText('dhuhr')).toBeInTheDocument();
+  });
+
+  it('should display calculation method info', () => {
+    render(<PrayerTimesDisplay />);
+    expect(screen.getByText(/Calculation Method:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Asr:/i)).toBeInTheDocument();
   });
 
   it('should be accessible', () => {
