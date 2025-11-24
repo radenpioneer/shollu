@@ -1,4 +1,11 @@
-export default function AboutDialog() {
+import React from 'react';
+/**
+ * About dialog component.
+ * Displays application information, version, credits, and license.
+ *
+ * @returns About dialog component
+ */
+const AboutDialog = (): React.JSX.Element => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">About Shollu</h2>
@@ -26,4 +33,6 @@ export default function AboutDialog() {
       </div>
     </div>
   );
-}
+};
+
+export default AboutDialog;

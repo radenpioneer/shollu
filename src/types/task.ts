@@ -1,3 +1,7 @@
+/**
+ * Types of scheduled tasks.
+ * Determines what action the task performs when triggered.
+ */
 export type TaskType =
   | 'info'
   | 'warning'
@@ -7,8 +11,15 @@ export type TaskType =
   | 'hibernate'
   | 'multimedia';
 
+/**
+ * Task execution frequency options.
+ */
 export type TaskFrequency = 'once' | 'daily' | 'weekly' | 'monthly' | 'startup';
 
+/**
+ * Scheduled task configuration.
+ * Tasks can trigger notifications, commands, or system actions at specified times.
+ */
 export interface Task {
   id: number;
   name: string;
@@ -26,6 +37,10 @@ export interface Task {
   lastExecuted?: string;
 }
 
+/**
+ * Record of a task execution.
+ * Tracks when tasks were executed and whether they succeeded.
+ */
 export interface TaskExecution {
   taskId: number;
   executedAt: string;

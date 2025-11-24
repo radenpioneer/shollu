@@ -1,4 +1,13 @@
-export default function SettingsPanel() {
+import React from 'react';
+/**
+ * Settings panel component.
+ * Provides configuration for location, calculation methods, appearance,
+ * notifications, audio, and behavior settings.
+ * Will be implemented in Phase 3.
+ *
+ * @returns Settings panel component
+ */
+const SettingsPanel = (): React.JSX.Element => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h2>
@@ -9,4 +18,6 @@ export default function SettingsPanel() {
       </div>
     </div>
   );
-}
+};
+
+export default SettingsPanel;

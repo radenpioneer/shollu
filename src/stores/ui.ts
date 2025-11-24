@@ -18,9 +18,9 @@ export const $sidebarOpen = atom<boolean>(true);
 
 /**
  * Navigates to a different view in the application.
- * 
+ *
  * @param view - View name to navigate to
- * 
+ *
  * @example
  * ```ts
  * navigateTo('settings');
@@ -32,7 +32,7 @@ export const navigateTo = (view: View): void => {
 
 /**
  * Toggles the sidebar open/closed state.
- * 
+ *
  * @example
  * ```ts
  * toggleSidebar(); // Opens if closed, closes if open

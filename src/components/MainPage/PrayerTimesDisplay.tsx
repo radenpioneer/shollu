@@ -1,4 +1,12 @@
-export default function PrayerTimesDisplay() {
+import React from 'react';
+/**
+ * Main page component displaying prayer times.
+ * Shows all 6 prayer times, current prayer indicator, and next prayer countdown.
+ * Will be fully implemented in Phase 2.
+ *
+ * @returns Prayer times display component
+ */
+const PrayerTimesDisplay = (): React.JSX.Element => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Prayer Times</h2>
@@ -7,4 +15,6 @@ export default function PrayerTimesDisplay() {
       </div>
     </div>
   );
-}
+};
+
+export default PrayerTimesDisplay;

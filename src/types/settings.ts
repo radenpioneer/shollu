@@ -1,6 +1,10 @@
 import { Language, TimeFormat, Theme } from './common';
 import { CalculationMethod, AsrCalculation, Location, PrayerAdjustments } from './prayer';
 
+/**
+ * Complete application settings configuration.
+ * Includes location, prayer calculation, notifications, appearance, and behavior settings.
+ */
 export interface AppSettings {
   // Location
   location: Location;
@@ -34,6 +38,10 @@ export interface AppSettings {
   hijriAdjustment: number;
 }
 
+/**
+ * Default application settings.
+ * Used when the app is first launched or settings are reset.
+ */
 export const defaultSettings: AppSettings = {
   location: {
     name: 'Jakarta',

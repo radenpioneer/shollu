@@ -10,9 +10,9 @@ export const $tasks = atom<Task[]>([]);
 /**
  * Adds a new task to the task list.
  * Generates ID and timestamp automatically.
- * 
+ *
  * @param task - Task data without id and createdAt
- * 
+ *
  * @example
  * ```ts
  * addTask({
@@ -37,10 +37,10 @@ export const addTask = (task: Omit<Task, 'id' | 'createdAt'>): void => {
 
 /**
  * Updates an existing task with partial values.
- * 
+ *
  * @param id - Task ID to update
  * @param updates - Partial task object with fields to update
- * 
+ *
  * @example
  * ```ts
  * updateTask(123456, { enabled: false, time: '07:00:00' });
@@ -53,9 +53,9 @@ export const updateTask = (id: number, updates: Partial<Task>): void => {
 
 /**
  * Deletes a task from the task list.
- * 
+ *
  * @param id - Task ID to delete
- * 
+ *
  * @example
  * ```ts
  * deleteTask(123456);

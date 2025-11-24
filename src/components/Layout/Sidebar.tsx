@@ -1,8 +1,12 @@
+import React from 'react';
 import { useStore } from '@nanostores/react';
 import { $currentView, navigateTo, type View } from '@/stores/ui';
 import { Home, Calendar, CheckSquare, Settings, RefreshCw, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Navigation menu items configuration.
+ */
 const menuItems: { id: View; label: string; icon: typeof Home }[] = [
   { id: 'main', label: 'Prayer Times', icon: Home },
   { id: 'schedule', label: 'Schedule', icon: Calendar },
@@ -12,7 +16,13 @@ const menuItems: { id: View; label: string; icon: typeof Home }[] = [
   { id: 'about', label: 'About', icon: Info },
 ];
 
-export default function Sidebar() {
+/**
+ * Sidebar navigation component.
+ * Displays the application logo and navigation menu with active state highlighting.
+ *
+ * @returns Sidebar navigation component
+ */
+const Sidebar = (): React.JSX.Element => {
   const currentView = useStore($currentView);
 
   return (
@@ -46,4 +56,6 @@ export default function Sidebar() {
       </nav>
     </aside>
   );
-}
+};
+
+export default Sidebar;

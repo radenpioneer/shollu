@@ -1,7 +1,15 @@
+import React from 'react';
 import { useStore } from '@nanostores/react';
 import { $currentTime } from '@/stores/prayer-times';
 
-export default function Header() {
+/**
+ * Application header component.
+ * Displays current date and time with live updates.
+ * Will include theme toggle and notifications in future phases.
+ *
+ * @returns Header component with live clock
+ */
+const Header = (): React.JSX.Element => {
   const currentTime = useStore($currentTime);
 
   return (
@@ -22,4 +30,6 @@ export default function Header() {
       </div>
     </header>
   );
-}
+};
+
+export default Header;

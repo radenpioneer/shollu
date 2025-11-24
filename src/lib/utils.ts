@@ -4,10 +4,10 @@ import { twMerge } from 'tailwind-merge';
 /**
  * Merges Tailwind CSS classes with clsx and tailwind-merge.
  * Handles conditional classes and resolves Tailwind conflicts.
- * 
+ *
  * @param inputs - Class values to merge (strings, objects, arrays)
  * @returns Merged class string with conflicts resolved
- * 
+ *
  * @example
  * ```ts
  * cn('px-2 py-1', 'px-4') // Returns 'py-1 px-4'

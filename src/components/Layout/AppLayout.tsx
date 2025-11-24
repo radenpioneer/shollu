@@ -1,3 +1,4 @@
+import React from 'react';
 import { useStore } from '@nanostores/react';
 import { $currentView } from '@/stores/ui';
 import Sidebar from './Sidebar';
@@ -9,7 +10,14 @@ import SettingsPanel from '@/components/Settings/SettingsPanel';
 import DateConverter from '@/components/Converter/DateConverter';
 import AboutDialog from '@/components/About/AboutDialog';
 
-export default function AppLayout() {
+/**
+ * Main application layout component.
+ * Provides the overall structure with sidebar, header, and content area.
+ * Handles view routing based on current navigation state.
+ *
+ * @returns Application layout with navigation and content
+ */
+const AppLayout = (): React.JSX.Element => {
   const currentView = useStore($currentView);
 
   return (
@@ -28,4 +36,6 @@ export default function AppLayout() {
       </div>
     </div>
   );
-}
+};
+
+export default AppLayout;

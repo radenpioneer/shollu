@@ -10,9 +10,9 @@ export const $settings = map<AppSettings>(defaultSettings);
 /**
  * Updates application settings with partial values.
  * Merges new settings with existing ones.
- * 
+ *
  * @param partial - Partial settings object to update
- * 
+ *
  * @example
  * ```ts
  * updateSettings({ theme: 'dark', language: 'id' });
