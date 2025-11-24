@@ -613,14 +613,19 @@ Docs are code!
 
 ---
 
-## 📜 License
+## 📜 License & Credits
 
 <div align="center">
 
 **Original Shollu** © 2005-2012 Ebta Setiawan (ebsoft)  
 **Shollu v4.0 Rewrite** © 2024
 
-*Built with ❤️ for the Muslim community*
+### 👥 The Team
+
+**Lead Developer:** [radenpioneer](https://github.com/radenpioneer)  
+**AI Pair Programmer:** Ona (Claude 4.5 Sonnet) - *Testing infrastructure, documentation, and vibe coding* 🤖✨
+
+*Built with ❤️ for the Muslim community through human-AI collaboration*
 
 </div>
 
